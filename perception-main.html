@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title></title>
+  <style>
+  input[type=text], select {
+  width: 30%;
+  padding: 8px 5px;
+  margin: 5px 0;
+  display: inline-block;
+  border: 1px solid #ccc;
+  border-radius: 2px;
+  box-sizing: border-box;
+}
+
+  #game {
+    background: black;
+    float: right;
+  }
+
+  #controls{
+    float: left;
+    font-family: Tahoma;
+  }
+
+  .button {
+  background-color: #4CAF50; /* Green */
+  border: none;
+  color: white;
+  padding: 5px 8px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 4px 2px;
+  cursor: pointer;
+}
+
+.button1 {background-color: #f44336; margin-left: 100px} /* Red */ 
+}
+  </style>
+</head>
+<boyVelocity>
+  
+<div id="controls">
+  <br> 
+  <br> <strong> Data Points - </strong>  
+  <br> (expected value, predicted value)
+  <br> 
+  <br> Difference values --> Wrong Predictions 
+  <br> <span style="background-color: black; color: red;"><strong>(x,o)</strong></span>
+  <br> 
+  <br> Identical values ---> Correct Predictions 
+  <br> <span style="background-color: black; color: white;"><strong>(x,x)</strong></span>
+  <br> 
+  <br> Learning Rate : <input type="text" id="input_learningrate" value=0.01 size="5" />
+  <br> 
+  <br> <button class="button button1" onclick="train_me()">Train Me!</button>
+  <br> <hr>
+  <br> 
+  <br> <strong> Custom Restart -  </strong> 
+  <br> 
+  <br> No. of points: <input type="text" id="input_datapoints" value=300 size="5" />
+  <br> 
+  <br> Text for comparison 
+  <br> <input type="text" id="input_target" value="x" size="4" /> <input type="text" id="input_predict" value="o" size="4" />
+  <br> 
+  <br> <button class="button button1" onclick="restart()">Restart</button>
+
+</div>
+
+<canvas width="1600" height="960" id="game"></canvas>
+
+<script>
+
+var canvas = document.getElementById('game');
+var context = canvas.getContext('2d');
+context.strokeStyle = 'white';
+context.fillStyle = 'white';
+context.font = "12px Calibri";
+var width = 1600;
+var height = 960;
+var characters = [];
+var datapoints = 0;
+var point = null;
+var catergoryArr = [-1, 1];
+
+function init(){
+  datapoints = document.getElementById("input_datapoints").value;
+  point = JSON.parse('{"-1": "' + document.getElementById("input_target").value + '", "1": "' + document.getElementById("input_predict").value + '"}');
+}
+
+class Neural {
+
+  constructor(){
+    this.weights = [-2.1, 0.2];
+    this.max_weights = 2
+    this.learning_rate = 0.001;
+  }
+
+  activation(inputs){
+    for(var i=0; i < this.max_weights; i++){
+      this.weighted_sum = getRandomFloat(-5, 5);
+      this.weighted_sum += inputs[i] * this.weights[i];
+    }
+
+    this.res = this.sign(this.weighted_sum);
+    return this.res;
+  }
+
+  sign(n) {
+    if(n >= 0){
+      return 1;
+    }
+    else{
+      return -1
+    }
+  }
+
+  train(inputs, target){
+    this.output = this.activation(inputs);
+    this.error = target - this.output;
+
+    for(var i=0; i < this.max_weights; i++){
+      this.weights[i] += this.error * inputs[i] * this.learning_rate;
+    }
+
+  }
+}
+
+class Input {
+  constructor(){
+    this.x = getRandomInt(0, width); 
+    this.y = getRandomInt(0, height);
+    this.target = catergoryArr[Math.floor(Math.random() * catergoryArr.length)];
+    
+  }
+}
+
+function getRandomInt(min, max) {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function getRandomFloat(min, max) {
+    return Math.random() * (max - min + 1) + min;
+}
+
+function train_me(){
+  brain.learning_rate = document.getElementById("input_learningrate").value;
+  context.clearRect(0,0,width,height);
+  // show canvas
+  for(var i=0; i < datapoints; i++){
+    var target = characters[i].target;
+    var inputCharacters = [ characters[i].x, target ];
+
+    brain.train(inputCharacters, target);
+
+    var predict = brain.activation(inputCharacters);
+    
+    console.log("Prediction: ", predict, "Actual: ", target)
+
+    if(target == predict){
+      context.fillStyle = 'white';
+    }
+    else {
+      context.fillStyle = 'red';
+    }
+    context.fillText("(" + point[target] + "," + point[predict] + ")" , characters[i].x, characters[i].y);
+  }
+}
+
+function setup(){
+  // populate inputs
+  for(var i=0; i < datapoints; i++){
+    characters[i] = new Input();
+  }
+}
+
+function output(){
+  for(var i=0; i < datapoints; i++){
+    var target = characters[i].target;
+    var inputCharacters = [ characters[i].x, target ];
+
+    //brain.train(inputCharacters, target);
+    //console.log("Prediction: ", predict, "Actual: ", target)
+
+    var predict = brain.activation(inputCharacters);
+
+    if(target == predict){
+      context.fillStyle = 'white';
+    }
+    else {
+      context.fillStyle = 'red';
+    }
+    context.fillText("(" + point[target] + "," + point[predict] + ")" , characters[i].x, characters[i].y);
+  }
+}
+
+function restart(){
+  characters = [];
+  context.clearRect(0,0,width,height);
+  init();
+  setup();
+  brain = new Neural();
+  output();
+}
+
+init();
+setup();
+brain = new Neural();
+output();
+
+
+
+</script>
+</boyVelocity>
+</html>
