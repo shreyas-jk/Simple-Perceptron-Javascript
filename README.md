@@ -8,3 +8,4 @@ For correct predictions or say if both values are identical, the data points is 
 For wrong predictions or say for difference in values, the data points are printed in "RED".
 (Just to make it more interactive)
 
+"Train Me!" button allows users to iterate the learning and prediction process and finally reach at a point where all predictions are correct.
