@@ -9,3 +9,5 @@ For wrong predictions or say for difference in values, the data points are print
 (Just to make it more interactive)
 
 "Train Me!" button allows users to iterate the learning and prediction process and finally reach at a point where all predictions are correct.
+
+![img](https://i.ibb.co/1vKM1ZT/Capture.png)
